@@ -5,6 +5,7 @@ import VideoBackground from './VideoBackground';
 import VideoTicker from './VideoTicker';
 import Spotify from './Spotify';
 import animations from './animations';
+import peerServer from '../peerServer';
 
 const spotify = new Spotify();
 const defaultLoopIntervalMs = 20000; //20000;
@@ -12,7 +13,7 @@ const maxLoopIntervalIfProgressMs = 40000;
 
 const sleep = async (ms: number): Promise<any> => {
   return new Promise((resolve) => {
-    let id: number;
+    let id: any;
     id = setTimeout(() => resolve(id), ms);
   });
 };
@@ -87,6 +88,17 @@ const Video: Component = () => {
 
   return (
     <div class={styles.Video}>
+      <div class={styles.GameLink}>
+        <a href={peerServer.gamepadURL}>
+          <img
+            src={
+              'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
+              encodeURIComponent(peerServer.gamepadURL)
+            }
+          />
+        </a>
+      </div>
+      <div class={titleClass()}>Stereo Bar TV</div>
       <VideoBackground />
       <VideoTicker currentlyPlaying={currentlyPlaying()} />
       {isValidToken() === false && (
@@ -95,7 +107,6 @@ const Video: Component = () => {
           <button onClick={redirectToLogin}>Login</button>
         </div>
       )}
-      {isValidToken() === true && <div class={titleClass()}>Stereo Bar TV</div>}
     </div>
   );
 };

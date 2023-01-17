@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.6.0",
+    "animate.css": "3.6.0",
+    "nes-cntlr": "^4.0.3",
     "peerjs": "^1.4.7",
     "solid-js": "^1.6.6",
-    "whatwg-fetch": "^3.6.2",
-    "animate.css": "3.6.0"
+    "wasmboy": "^0.7.1",
+    "whatwg-fetch": "^3.6.2"
   }
 }

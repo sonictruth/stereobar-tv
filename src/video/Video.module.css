@@ -6,7 +6,7 @@
   left: 0;
   z-index: 100;
   box-sizing: border-box;
-  padding: 40px;
+  padding: 20px;
   font-family: 'Fredoka One';
   overflow: hidden;
 }
@@ -18,7 +18,17 @@
   font-size: 3em;
 }
 
+.GameLink {
+  position: absolute;
+  left: 20px;
+  top:20px;
+}
+
 .Title {
+  position: absolute;
+  left: 0;
+  top:0;
+  right: 0;
   text-align: center;
   -webkit-text-stroke: 3px black;
   -webkit-text-fill-color: white;

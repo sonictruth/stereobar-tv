@@ -1,7 +1,15 @@
 import type { Component } from 'solid-js';
+import  { createEffect } from 'solid-js';
 import styles from './App.module.css';
-import { Routes, Route, Navigate, useLocation, useNavigate } from '@solidjs/router';
-import { Peer } from 'peerjs';
+import {
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate,
+} from '@solidjs/router';
+
+import peerServer from "./peerServer";
 
 import Video from './video/Video';
 import Gamepad from './gamepad/Gamepad';
@@ -10,38 +18,21 @@ import Game from './game/Game';
 const App: Component = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  if (location.pathname !== '/gamepad') {
-    let peerServer = new Peer('ec17331b-xxx', {
-      debug: 0,
-    });
-    peerServer.on('error', (error) => {
-      console.log('Error', error);
-    });
-    peerServer.on('disconnected', () => {
-      console.log('disconnected');
-    });
-    peerServer.on('connection', (conn) => {
-      conn.on('close', () => {
-        console.log('close');
-      });
-      conn.on('error', (error) => {
-        console.log('error', error);
-      });
-      conn.on('open', () => {
-        conn.send('hello from server');
-      });
-      conn.on('data', (data) => {
-        console.log('Server', data);
-        navigate('/game');
-      });
-    });
+  if(!location.pathname.includes('gamepad')) {
+    peerServer.connect();
   }
+  createEffect(()=> {
+    const gameID = peerServer.game();
+    if(gameID) {
+      navigate('/game/' + gameID);
+    } 
+  });
   return (
     <div class={styles.App}>
       <Routes>
         <Route path="/video" component={Video} />
-        <Route path="/gamepad" component={Gamepad} />
-        <Route path="/game" component={Game} />
+        <Route path="/gamepad/:serverID" component={Gamepad} />
+        <Route path="/game/:gameID" component={Game} />
         <Route path="/" element={<Navigate href="/video" />} />
       </Routes>
     </div>

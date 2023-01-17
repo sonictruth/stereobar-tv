@@ -6,7 +6,6 @@ type VideoTickerProps = {
 };
 
 const VideoTicker: Component<VideoTickerProps> = (props) => {
-  console.log(props);
   return (
     <>
       {props.currentlyPlaying !== null && (
