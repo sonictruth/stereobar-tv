@@ -1,15 +1,18 @@
-import type { Component } from 'solid-js';
+import { Component, For } from 'solid-js';
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import styles from './Video.module.css';
-import VideoBackground from './VideoBackground';
-import VideoTicker from './VideoTicker';
-import Spotify from './Spotify';
 import animations from './animations';
-import peerServer from '../peerServer';
 
-const spotify = new Spotify();
-const defaultLoopIntervalMs = 20000; //20000;
-const maxLoopIntervalIfProgressMs = 40000;
+import VideoBackground from './VideoBackground';
+import TrackInfo from './TrackInfo';
+
+import peerServer from '../peerServer';
+import GameInfo from './GameInfo';
+
+const animateTracksIntervalMs = 3000;
+const updateTracksIntervalMs = 25000;
+
+const lastFMApiURL = 'http://www.sonicpix.ro/lastfm.php';
 
 const sleep = async (ms: number): Promise<any> => {
   return new Promise((resolve) => {
@@ -18,95 +21,78 @@ const sleep = async (ms: number): Promise<any> => {
   });
 };
 
-const redirectToLogin = () => {
-  document.location.href = spotify.getLoginURL();
-};
-
 const Video: Component = () => {
-  const [isValidToken, setIsValidToken] = createSignal<any>(null);
-  const [currentlyPlaying, setCurrentlyPlaying] = createSignal<any>(null);
-  const [titleClass, setTitleClass] = createSignal(styles.Title);
-  const [error, setError] = createSignal('');
-  let lastAnimation: any = null;
-  let timeoutID: any = null;
+  let animateTracksTimer: any, updateTracksTimer: any;
+  let lastTrackEl: HTMLDivElement |undefined ;
+  let currentTrackEl: HTMLDivElement |undefined ;
+  const [error, setError] = createSignal<any>(null);
+  const [tracks, setTracks] = createSignal<any[]>([]);
+  const [currentTrack, setCurrentTrack] = createSignal<any>(null);
+  const [lastTrack, setLastTrack] = createSignal<any>(null);
+  const [gamepadURL, setGamepadURL] = createSignal('http://www.google.com/');
 
-  const updaterLoop = async () => {
-    let intervalMs = defaultLoopIntervalMs;
-    try {
-      const current = await spotify.getCurrentlyPlayingSong();
-      setCurrentlyPlaying(current);
-      if (current) {
-        const isPlaying = current.is_playing;
-        if (isPlaying) {
-          const progressMs = current.progress_ms;
-          const durationMs = current.item.duration_ms;
-          intervalMs = durationMs - progressMs + 1000;
-          intervalMs = Math.min(maxLoopIntervalIfProgressMs, intervalMs);
+  const updateTracks = async () => {
+    const response = await fetch(lastFMApiURL);
+    const newTracks = await response.json();
+    setTracks(newTracks);
+  };
+
+  const animateTracks = async () => {
+    if(lastTrackEl) {
+      lastTrackEl.style.display = 'none';
+    }
+    if(currentTrackEl) {
+      currentTrackEl.style.display = 'block';
+    }
+    const trackList: any[] = tracks();
+    const current = currentTrack();
+    if (trackList.length > 0) {
+      if (current === null) {
+        setCurrentTrack(trackList[0]);
+      } else {
+        const currentIndex = trackList.findIndex(
+          (track) => track.id === current.id,
+        );
+        let nextIndex = currentIndex + 1;
+        if (currentIndex === -1 || nextIndex > trackList.length - 1) {
+          nextIndex = 0;
         }
+        setCurrentTrack(trackList[nextIndex]);
+        setLastTrack(current);
       }
-    } catch (error) {
-      console.error(error);
     }
-    timeoutID = setTimeout(() => updaterLoop(), intervalMs);
   };
-
-  const animateTitle = async () => {
-    if (lastAnimation) {
-      const outAnimation = lastAnimation.replace('$dir', 'Out');
-      setTitleClass(styles.Title + ' animated ' + outAnimation);
-      await sleep(1000);
-    }
-    const randomAnim =
-      animations[Math.floor(Math.random() * animations.length)];
-    const inAnimation = randomAnim.replace('$dir', 'In');
-    lastAnimation = randomAnim;
-    setTitleClass(styles.Title + ' animated ' + inAnimation);
-  };
-  const animationTimer = setInterval(() => animateTitle(), 10000);
-  animateTitle();
 
   onMount(async () => {
-    const code = new URLSearchParams(document.location.search).get('code');
-    try {
-      if (code) {
-        const password = prompt('Token save password', '') || '';
-        await spotify.saveRefresToken(code, password);
-      }
-      const isValid = await spotify.isValidRefreshToken();
-      setIsValidToken(isValid);
-      updaterLoop();
-    } catch (error) {
-      setIsValidToken(false);
-      setError(JSON.stringify(error));
-    }
+    animateTracksTimer = setInterval(
+      () => animateTracks(),
+      animateTracksIntervalMs,
+    );
+    updateTracksTimer = setInterval(
+      () => updateTracks(),
+      updateTracksIntervalMs,
+    );
+    await updateTracks();
+    animateTracks();
   });
 
   onCleanup(() => {
-    clearTimeout(timeoutID);
-    clearInterval(animationTimer);
+    clearInterval(animateTracksTimer);
+    clearInterval(updateTracksTimer);
   });
 
   return (
     <div class={styles.Video}>
-      <div class={styles.GameLink}>
-        <a href={peerServer.gamepadURL}>
-          <img
-            src={
-              'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
-              encodeURIComponent(peerServer.gamepadURL)
-            }
-          />
-        </a>
+      <div class={styles.Title}>Stereo Bar TV</div>
+      <GameInfo url={gamepadURL()} />
+      <div ref={currentTrackEl}>
+        <TrackInfo data={currentTrack()} />
       </div>
-      <div class={titleClass()}>Stereo Bar TV</div>
+      <div ref={lastTrackEl}>
+        <TrackInfo data={lastTrack()} />
+      </div>
+
       <VideoBackground />
-      <VideoTicker currentlyPlaying={currentlyPlaying()} />
-      {isValidToken() === false && (
-        <div class={styles.Login}>
-          {error()} <br />
-          <button onClick={redirectToLogin}>Login</button>
-        </div>
-      )}
     </div>
   );
 };
