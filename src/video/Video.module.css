@@ -21,3 +21,49 @@
   -webkit-text-fill-color: white;
   font-size: 4.5em;
 }
+
+.Slider{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100vw;
+}
+
+.TrackSlideIn {
+  animation-timing-function: ease-out;
+  animation-name: TrackSlideIn;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+}
+
+.TrackSlideOut {
+  animation-timing-function: ease-out;
+  animation-name: TrackSlideOut;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+}
+
+@keyframes TrackSlideOut {
+  0% {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+    visibility: none;
+  }
+}
+
+@keyframes TrackSlideIn {
+  0% {
+    transform: translate3d(100%, 0, 0);
+    visibility: visible;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    visibility: none;
+  }
+}

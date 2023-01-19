@@ -1,4 +1,4 @@
-import type { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import styles from './TrackInfo.module.css';
 
 type props = {
@@ -7,26 +7,18 @@ type props = {
 
 const TrackInfo: Component<props> = (props) => {
   return (
-    <>
-      {props.data !== null && (
-        <div class={styles.TrackInfo}>
-          <div class={styles.Album}>
-            <img src={props.data.img} />
-          </div>
-          <div class={styles.TextBox}>
-            <div class={styles.ArtistName}>
-              {props.data.artist}
-            </div>
-            <div class={styles.TrackName}>
-              {props.data.name}
-            </div>
-            <div class={styles.TrackTime}>
-              {props.data.time}
-            </div>
-          </div>
+    <Show when={props.data !== null}>
+      <div class={styles.TrackInfo}>
+        <div class={styles.Album}>
+          <img src={props.data.img} />
         </div>
-      )}
-    </>
+        <div class={styles.TextBox}>
+          <div class={styles.ArtistName}>{props.data.artist}</div>
+          <div class={styles.TrackName}>{props.data.name}</div>
+          <div class={styles.TrackTime}>{props.data.time}</div>
+        </div>
+      </div>
+    </Show>
   );
 };
 
