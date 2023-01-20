@@ -22,6 +22,7 @@ const Game: Component = () => {
   let buf32: Uint32Array; // = new Uint32Array(buf);
   let isReady = false;
   let lastRender = 0;
+  let lastEmulation = 0;
 
   let nesEmulator: any;
   let reqAnimationFrameTimer: any;
@@ -61,8 +62,11 @@ const Game: Component = () => {
   };
 
   const mainEmulationLoop = () => {
-    if (isReady) {
+    const now = performance.now();
+    const elapsed = now - lastEmulation;
+    if (isReady && elapsed > 15) {
       nesEmulator.frame();
+      lastEmulation = now;
     }
     reqAnimationFrameTimer = requestAnimationFrame(mainEmulationLoop);
   };
@@ -71,7 +75,7 @@ const Game: Component = () => {
     let i = 0;
     const now = performance.now();
     const elapsed = now - lastRender;
-    if (imageData && context && elapsed > 50) {
+    if (imageData && context && elapsed > 60) {
       for (var y = 0; y < screenHeight; ++y) {
         for (var x = 0; x < screenWidth; ++x) {
           i = y * 256 + x;
