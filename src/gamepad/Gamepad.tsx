@@ -2,113 +2,78 @@ import { Component, For } from 'solid-js';
 import { createSignal } from 'solid-js';
 import { onMount, onCleanup } from 'solid-js';
 import { Peer } from 'peerjs';
+import styles from './Gamepad.module.css';
+import './custom.css';
+import { useParams } from '@solidjs/router';
+import { PeerCommand, PeerCommandKeyPayLoad } from '../peerServer';
 
 // @ts-ignore
 import NESCntlr from 'nes-cntlr';
 
 let eventsArr = [
   'up-left',
-  'up',
   'up-right',
+  'down-left',
+  'down-right',
+  'up',
   'right',
   'left',
-  'down-left',
   'down',
-  'down-right',
   'b',
   'a',
   'select',
   'start',
 ];
-import styles from './Gamepad.module.css';
 
-import { useParams } from '@solidjs/router';
+let jsNesControllerMap: any = {
+  a: [0],
+  b: [1],
+  select: [2],
+  start: [3],
+  up: [4],
+  down: [5],
+  left: [6],
+  right: [7],
+  'up-left': [4, 6],
+  'up-right': [4, 7],
+  'down-left': [5, 6],
+  'down-right': [5, 7],
+};
 
 const Gamepad: Component = () => {
   const params = useParams();
   const [gameList, setGameList] = createSignal(null);
+  const [playerIndex, setPlayerIndex] = createSignal(1);
   const serverId = params.serverID;
   let playerVirtualController: any;
   let peerClient: any;
   let peerConnection: any;
 
-  const loadGame = (gameId: string) => {
+  const loadGame = (gameID: string) => {
     if (peerConnection) {
-      peerConnection.send({ cmd: 'loadGame', gameId });
+      const cmd: PeerCommand = { name: 'loadGame', payload: gameID };
+      peerConnection.send(cmd);
     }
   };
-  
-  const onKeyPress = (e: any) => {
+
+  const showFullScreen = () => {
+    document.body.requestFullscreen();
+    screen.orientation.lock('landscape-primary');
+  };
+
+  const onKeyPress = (keyEvent: any) => {
     if (peerConnection) {
-      let event = {};
-      const btn = e.detail.btn;
-      switch (btn) {
-        case 'up-left':
-          event = {
-            UP: e.detail.pressed,
-            LEFT: e.detail.pressed,
-          };
-          break;
-        case 'up-right':
-          event = {
-            UP: e.detail.pressed,
-            RIGHT: e.detail.pressed,
-          };
-          break;
-        case 'down-left':
-          event = {
-            DOWN: e.detail.pressed,
-            LEFT: e.detail.pressed,
-          };
-          break;
-        case 'down-right':
-          event = {
-            DOWN: e.detail.pressed,
-            RIGHT: e.detail.pressed,
-          };
-          break;
-        case 'a':
-          event = {
-            A: e.detail.pressed,
-          };
-          break;
-        case 'b':
-          event = {
-            B: e.detail.pressed,
-          };
-          break;
-        case 'select':
-          event = {
-            SELECT: e.detail.pressed,
-          };
-          break;
-        case 'start':
-          event = {
-            START: e.detail.pressed,
-          };
-          break;
-        case 'up':
-          event = {
-            UP: e.detail.pressed,
-          };
-          break;
-        case 'down':
-          event = {
-            DOWN: e.detail.pressed,
-          };
-          break;
-        case 'left':
-          event = {
-            LEFT: e.detail.pressed,
-          };
-          break;
-        case 'right':
-          event = {
-            RIGHT: e.detail.pressed,
-          };
-          break;
+      const key = jsNesControllerMap[keyEvent.detail.btn];
+      let payload: PeerCommandKeyPayLoad = {
+        s: keyEvent.detail.pressed,
+        p: playerIndex(),
+        k: key,
+      };
+      const cmd: PeerCommand = { name: 'key', payload };
+      peerConnection.send(cmd);
+      if (keyEvent.detail.pressed && navigator.vibrate) {
+        navigator.vibrate(60);
       }
-      peerConnection.send({ cmd: 'key', event });
     }
   };
 
@@ -116,7 +81,6 @@ const Gamepad: Component = () => {
     playerVirtualController = new NESCntlr({
       virtual: 'always',
     });
-
     eventsArr.forEach((event) => {
       document.addEventListener(`player1:${event}`, onKeyPress);
     });
@@ -125,32 +89,33 @@ const Gamepad: Component = () => {
     peerClient = new Peer({
       debug: 0,
     });
+
     peerClient.on('error', (error: any) => {
-      console.error('Client Error', error.message);
+      console.error('Peer Error', error.message);
     });
 
     peerClient.on('disconnected', () => {
-      console.log('Disconnected');
+      console.log('Peer Disconnected');
     });
 
     peerClient.on('open', () => {
       peerConnection = peerClient.connect(serverId, {
         reliable: true,
       });
-      peerConnection.on('open', () => {
-        console.log('open');
-        peerConnection.send({ cmd: 'pong' });
-      });
-      peerConnection.on('data', (data: any) => {
-        if (data.cmd === 'gameList') {
-          setGameList(data.gameList);
-        }
-      });
       peerConnection.on('error', (error: any) => {
-        console.log(error);
+        console.error('Connection error', error);
       });
       peerConnection.on('close', () => {
-        console.log('close');
+        console.log('Connection closed');
+      });
+      peerConnection.on('open', () => {
+        const cmd: PeerCommand = { name: 'pong' };
+        peerConnection.send(cmd);
+      });
+      peerConnection.on('data', (cmd: PeerCommand) => {
+        if (cmd.name === 'gameList') {
+          setGameList(cmd.payload);
+        }
       });
     });
   });
@@ -165,13 +130,31 @@ const Gamepad: Component = () => {
   });
 
   return (
-    <div>
+    <div class={styles.GamePad}>
+      <div>Stereo BAR Player {playerIndex()}</div>
       <For each={gameList()}>
-        {(game, i) => (
-          <button onClick={() => loadGame(game.id)}>{game.name}</button>
+        {(game) => (
+          <div class={styles.GamePadButton} onClick={() => loadGame(game.id)}>
+            {game.name}
+          </div>
         )}
       </For>
-      <button onClick={() => loadGame('')}>Close</button>
+      <div>
+        <div>
+          <div
+            class={styles.GamePadButton}
+            onClick={() => setPlayerIndex(playerIndex() === 1 ? 2 : 1)}
+          >
+            Play as {playerIndex() === 1 ? 2 : 1}
+          </div>
+        </div>
+        <div class={styles.GamePadButton} onClick={() => loadGame('')}>
+          Unload
+        </div>
+        <div class={styles.GamePadButton} onClick={() => showFullScreen()}>
+          Fullscreen
+        </div>
+      </div>
     </div>
   );
 };

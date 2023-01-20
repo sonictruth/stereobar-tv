@@ -67,7 +67,7 @@ const Video: Component = () => {
         setLastTrack(current);
       }
     }
-    if(currentTrack() && currentTrack().now) {
+    if (currentTrack() && currentTrack().now) {
       sleepTime = sleepTime * 2;
     }
     await sleep(sleepTime);
@@ -94,7 +94,7 @@ const Video: Component = () => {
       <GameInfo url={peerServer.gamepadURL()} />
       <div class={styles.Slider}>
         <div ref={currentTrackEl}>
-          <TrackInfo  data={currentTrack()} />
+          <TrackInfo data={currentTrack()} />
         </div>
         <div ref={lastTrackEl}>
           <TrackInfo data={lastTrack()} />
