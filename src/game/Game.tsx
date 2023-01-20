@@ -21,6 +21,7 @@ const Game: Component = () => {
   let buf8: Uint8ClampedArray; // = new Uint8ClampedArray(buf);
   let buf32: Uint32Array; // = new Uint32Array(buf);
   let isReady = false;
+  let lastRender = 0;
 
   let nesEmulator: any;
   let reqAnimationFrameTimer: any;
@@ -68,17 +69,21 @@ const Game: Component = () => {
 
   const onFrame = (frameBuffer: any) => {
     let i = 0;
-    for (var y = 0; y < screenHeight; ++y) {
-      for (var x = 0; x < screenWidth; ++x) {
-        i = y * 256 + x;
-        // Convert pixel from NES BGR to canvas ABGR
-        buf32[i] = 0xff000000 | frameBuffer[i]; // Full alpha
+    const now = performance.now();
+    const elapsed = now - lastRender;
+    if (imageData && context && elapsed > 50) {
+      for (var y = 0; y < screenHeight; ++y) {
+        for (var x = 0; x < screenWidth; ++x) {
+          i = y * 256 + x;
+          // Convert pixel from NES BGR to canvas ABGR
+          buf32[i] = 0xff000000 | frameBuffer[i]; // Full alpha
+        }
       }
-    }
-    if (imageData && context) {
       imageData.data.set(buf8);
       context.putImageData(imageData, 0, 0);
+      lastRender = now;
     }
+
   };
 
   const initCanvas = () => {

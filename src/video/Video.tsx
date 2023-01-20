@@ -11,7 +11,7 @@ import GameInfo from './GameInfo';
 const animateTracksIntervalMs = 5000;
 const updateTracksIntervalMs = 25000;
 
-const lastFMApiURL = 'http://www.sonicpix.ro/lastfm.php';
+const lastFMApiURL = 'https://www.sonicpix.ro/lastfm.php';
 
 const Video: Component = () => {
   let animateTracksTimer: any, updateTracksTimer: any, sleepTimer: any;
