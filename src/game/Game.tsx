@@ -5,43 +5,6 @@ import gameList from './gameList';
 import styles from './Game.module.css';
 import { useParams } from '@solidjs/router';
 import peerServer from '../peerServer';
-// @ts-ignore
-import { WasmBoy } from 'wasmboy';
-
-const WasmBoyJoypadState = {
-  UP: false,
-  RIGHT: false,
-  DOWN: false,
-  LEFT: false,
-  A: false,
-  B: false,
-  SELECT: false,
-  START: false,
-};
-
-const options = {
-  gameboyFrameRate: 30,
-  // gbcColorizationPalette
-  graphicsBatchProcessing: false,
-  graphicsDisableScanlineRendering: false,
-  headless: false,
-  isAudioEnabled: false,
-  enableBootROMIfAvailable: true,
-  isGbcColorizationEnabled: true,
-  isGbcEnabled: true,
-
-  maxNumberOfAutoSaveStates: 10,
-  onLoadedAndStarted: null,
-  onPause: null,
-  onPlay: null,
-  onReady: null,
-  saveStateCallback: null,
-  tileCaching: false,
-  tileRendering: false,
-  timersBatchProcessing: false,
-  updateAudioCallback: null,
-  updateGraphicsCallback: null,
-};
 
 const Game: Component = () => {
   const params = useParams();
@@ -55,27 +18,15 @@ const Game: Component = () => {
   });
 
   createEffect(() => {
-    const newState = {
-      ...WasmBoyJoypadState,
-      ...peerServer.key(),
-    };
-    console.log(newState)
-    WasmBoy.setJoypadState(newState);
+    console.log(peerServer.cmd());
   });
 
   const loadGame = async (url: string) => {
-    console.log('load');
-    await WasmBoy.disableDefaultJoypad();
-    await WasmBoy.config(options, canvas);
-    await WasmBoy.reset();
-    await WasmBoy.loadROM(url);
-    await WasmBoy.play();
+    console.log('load game', url);
   };
 
   onMount(async () => {});
-  onCleanup(async () => {
-    await WasmBoy.reset();
-  });
+  onCleanup(async () => {});
 
   return <canvas ref={canvas} class={styles.Game}></canvas>;
 };

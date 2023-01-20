@@ -2,33 +2,44 @@ import { createSignal, createRoot } from 'solid-js';
 import { Peer } from 'peerjs';
 import gameList from './game/gameList';
 
-const id = 'sbar-' + Math.random().toString(36).slice(8);
-const gamepadURL =
-  document.location.protocol +
-  '//' +
-  document.location.host +
-  document.location.pathname +
-  '#/gamepad/' +
-  id;
+const generateID = () => {
+  return 'sbar-' + Math.random().toString(36).slice(8);
+};
+
+const getGamepadURLFromID = (id: string) => {
+  return document.location.protocol +
+    '//' +
+    document.location.host +
+    document.location.pathname +
+    '#/gamepad/' +
+    id;
+};
 
 function createPeerServer() {
-  console.log('init');
-  const [game, setGame] = createSignal<any>(null);
-  const [key, setKey] = createSignal<any>(null);
+  const [gamepadURL, setGamepadURL] = createSignal<any>(null);
+  const [peerID, setPeerID] = createSignal<any>(null);
+  const [cmd, setCmd] = createSignal<any>(null);
+
   const connect = () => {
-    let peerServer = new Peer(id, {
+    setPeerID(generateID());
+
+    let peerServer = new Peer(peerID(), {
       debug: 0,
     });
     peerServer.on('error', (error) => {
       console.error('Error', error);
     });
     peerServer.on('disconnected', () => {
-      console.log('disconnected');
+      console.log('Disconected');
+      peerServer.reconnect();
     });
     peerServer.on('open', (id) => {
-      console.log('Peer connection id:', id);
+      const url = getGamepadURLFromID(peerID());
+      setGamepadURL(url);
+      console.log('Gamepad URL:', url);
     });
     peerServer.on('connection', (conn) => {
+      console.log('New Connection', conn.peer);
       conn.on('close', () => {
         console.log('close');
       });
@@ -39,18 +50,11 @@ function createPeerServer() {
         conn.send({ cmd: 'gameList', gameList });
       });
       conn.on('data', (data: any) => {
-        console.log(data);
-        if (data.cmd === 'key') {
-          setKey(data.event);
-        }
-        if(data.cmd === 'loadGame') {
-          setGame(data.gameId);
-        }
+        setCmd(data);
       });
     });
   };
-
-  return { connect, gamepadURL, key, game };
+  return {connect, gamepadURL, cmd };
 }
 
 export default createRoot(createPeerServer);

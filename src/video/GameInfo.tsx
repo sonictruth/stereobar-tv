@@ -1,5 +1,5 @@
-import type { Component } from 'solid-js';
-import styles from './TrackInfo.module.css';
+import { Component, Show } from 'solid-js';
+import styles from './GameInfo.module.css';
 
 type props = {
   url: any;
@@ -7,15 +7,17 @@ type props = {
 
 const TrackInfo: Component<props> = (props) => {
   return (
-    <div class={styles.GameLink}>
-      <a href={props.url}>
-        <img
-          src={
-            'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
-            encodeURIComponent(props.url)
-          }
-        />
-      </a>
+    <div class={styles.GameInfo}>
+      <Show when={props.url} fallback={(<div>Loading</div>)}>
+        <a href={props.url}>
+          <img
+            src={
+              'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
+              encodeURIComponent(props.url)
+            }
+          />
+        </a>
+      </Show>
     </div>
   );
 };

@@ -37,6 +37,7 @@ const Gamepad: Component = () => {
       peerConnection.send({ cmd: 'loadGame', gameId });
     }
   };
+  
   const onKeyPress = (e: any) => {
     if (peerConnection) {
       let event = {};

@@ -21,7 +21,6 @@ const Video: Component = () => {
   const [tracks, setTracks] = createSignal<any[]>([]);
   const [currentTrack, setCurrentTrack] = createSignal<any>(null);
   const [lastTrack, setLastTrack] = createSignal<any>(null);
-  const [gamepadURL, setGamepadURL] = createSignal('http://www.google.com/');
 
   const sleep = async (ms: number): Promise<any> => {
     return new Promise((resolve) => {
@@ -92,7 +91,7 @@ const Video: Component = () => {
   return (
     <div class={styles.Video}>
       <div class={styles.Title}>Stereo Bar TV</div>
-      <GameInfo url={gamepadURL()} />
+      <GameInfo url={peerServer.gamepadURL()} />
       <div class={styles.Slider}>
         <div ref={currentTrackEl}>
           <TrackInfo  data={currentTrack()} />
