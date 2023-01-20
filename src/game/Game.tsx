@@ -107,8 +107,9 @@ const Game: Component = () => {
     initCanvas();
     listenPeerCommand((peerCommand) => onPeerCommand(peerCommand));
     nesEmulator = new jsnes.NES({
-      preferredFrameRate: 30,
+      // preferredFrameRate: 30,
       onFrame: onFrame,
+      emulateSound: false,
       onStatusUpdate: console.log,
     });
     mainEmulationLoop();
