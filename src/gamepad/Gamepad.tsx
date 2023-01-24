@@ -82,9 +82,18 @@ const Gamepad: Component = () => {
 
   const connectPeer = () => {
     setState(State.Loading);
+    console.log(peerClient.connect);
     peerConnection = peerClient.connect(serverPeerIDPrefix + pin(), {
+      // FIXME: Ordered ?
       reliable: true,
+      ordered: true,
+      _payload: {
+        reliable: true,
+        ordered: true,  
+        originator: true,
+      }
     });
+    console.log(peerConnection);
     peerConnection.on('error', (error: any) => {
       console.error('Connection error', error);
       setState(State.Error);

@@ -30,9 +30,10 @@ const GamepadButtons: Component<props> = (props) => {
   const onKeyPress = (keyEvent: any) => {
     props.onNesKey(keyEvent);
     if (keyEvent.detail.pressed && navigator.vibrate) {
-      navigator.vibrate(60);
+      navigator.vibrate(80);
     }
   };
+
   onMount(() => {
     // @ts-ignore
     if (!window[globalNesPropertyName]) {

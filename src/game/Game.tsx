@@ -53,7 +53,7 @@ const Game: Component = () => {
         }
       }
       fceux.setControllerBits(controllerBits);
-    } 
+    }
   };
 
   const updateLoop = () => {
