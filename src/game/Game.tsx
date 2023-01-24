@@ -1,137 +1,80 @@
-import type { Component } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import { createEffect } from 'solid-js';
 import { onCleanup, onMount } from 'solid-js';
 import gameList from './gameList';
 import styles from './Game.module.css';
 import { useParams } from '@solidjs/router';
-import { PeerCommand, PeerCommandKeyPayLoad, listenPeerCommand } from '../peerServer';
-import getRomBinary from './getRomBinary';
-// @ts-ignore
-import jsnes from 'jsnes';
+import {
+  PeerCommand,
+  PeerCommandKeyPayLoad,
+  listenPeerCommand,
+} from '../peerServer';
 
-const screenWidth = 256;
-const screenHeight = 240;
+// @ts-ignore
+import FCEUX from './fceux';
+// @ts-ignore
+import FCEUXWasmURL from '../assets/emulator/fceux.wasm';
 
 const Game: Component = () => {
   const params = useParams();
-  let canvasRef: HTMLCanvasElement | undefined;
-  let context: CanvasRenderingContext2D | null;
-  let imageData: ImageData | null;
-  let buf: ArrayBuffer; //= new ArrayBuffer(imageData.data.length);
-  let buf8: Uint8ClampedArray; // = new Uint8ClampedArray(buf);
-  let buf32: Uint32Array; // = new Uint32Array(buf);
-  let isReady = false;
-  let lastRender = 0;
-  let lastEmulation = 0;
-
-  let nesEmulator: any;
+  let controllerBits = 0;
+  let [isReady, setIsReady] = createSignal(false);
+  let fceux: any;
   let reqAnimationFrameTimer: any;
 
   createEffect(async () => {
-    if (params.gameID) {
-      const game: any = gameList.find((game) => game.id === params.gameID);
-      if (game) {
-        await loadGame(game.url);
+    if (isReady() && fceux) {
+      const gameInfo: any = gameList.find((game) => game.id === params.gameID);
+      if (gameInfo) {
+        controllerBits = 0;
+        await fceux.reset();
+        await fceux.downloadGame(gameInfo.url);
       } else {
         console.error('No game found');
       }
     }
   });
 
-  const loadGame = async (url: string) => {
-    isReady = false;
-    const romData = await getRomBinary(url);
-    console.log(nesEmulator);
-    nesEmulator.loadROM(romData);
-    isReady = true;
+  const initEmulator = async () => {
+    fceux = await FCEUX({ FCEUXWasmURL });
+    await fceux.init('#nescanvas');
+    fceux.setMuted(true);
   };
 
   const onPeerCommand = (peerCommand: PeerCommand) => {
-    if (peerCommand.name === 'key' && isReady) {
-      const keyCommand:PeerCommandKeyPayLoad = peerCommand.payload;
-      for(let i = 0; i < keyCommand.k.length; i++) {
-        if(keyCommand.s) {
-          console.log(keyCommand.k[i]);
-          nesEmulator.buttonDown(keyCommand.p, keyCommand.k[i]);
+    if (peerCommand.name === 'key' && isReady()) {
+      const keyCommand: PeerCommandKeyPayLoad = peerCommand.payload;
+      for (let i = 0; i < keyCommand.k.length; i++) {
+        const key = keyCommand.k[i] + (keyCommand.p === 1 ? 0 : 8);
+        if (keyCommand.s) {
+          controllerBits |= 1 << key;
         } else {
-
-          nesEmulator.buttonUp(keyCommand.p, keyCommand.k[i]);
+          controllerBits &= ~(1 << key);
         }
       }
-    }
+      fceux.setControllerBits(controllerBits);
+    } 
   };
 
-  const mainEmulationLoop = () => {
-    const now = performance.now();
-    const elapsed = now - lastEmulation;
-    if (isReady && elapsed > 15) {
-      nesEmulator.frame();
-      lastEmulation = now;
-    }
-    reqAnimationFrameTimer = requestAnimationFrame(mainEmulationLoop);
+  const updateLoop = () => {
+    fceux.update();
+    reqAnimationFrameTimer = requestAnimationFrame(updateLoop);
   };
 
-  const onFrame = (frameBuffer: any) => {
-    let i = 0;
-    const now = performance.now();
-    const elapsed = now - lastRender;
-    if (imageData && context && elapsed > 60) {
-      for (var y = 0; y < screenHeight; ++y) {
-        for (var x = 0; x < screenWidth; ++x) {
-          i = y * 256 + x;
-          // Convert pixel from NES BGR to canvas ABGR
-          buf32[i] = 0xff000000 | frameBuffer[i]; // Full alpha
-        }
-      }
-      imageData.data.set(buf8);
-      context.putImageData(imageData, 0, 0);
-      lastRender = now;
-    }
-
-  };
-
-  const initCanvas = () => {
-    if (canvasRef) {
-      context = canvasRef.getContext('2d');
-      if (context) {
-        context.fillStyle = 'black';
-        context.fillRect(0, 0, screenWidth, screenHeight);
-        imageData = context?.getImageData(0, 0, screenWidth, screenHeight);
-        buf = new ArrayBuffer(imageData.data.length);
-        buf8 = new Uint8ClampedArray(buf);
-        buf32 = new Uint32Array(buf);
-        for (var i = 0; i < buf32.length; ++i) {
-          buf32[i] = 0xff000000;
-        }
-      }
-    }
-  };
-
-  onMount(() => {
-    initCanvas();
+  onMount(async () => {
     listenPeerCommand((peerCommand) => onPeerCommand(peerCommand));
-    nesEmulator = new jsnes.NES({
-      // preferredFrameRate: 30,
-      onFrame: onFrame,
-      emulateSound: false,
-      onStatusUpdate: console.log,
-    });
-    mainEmulationLoop();
+    await initEmulator();
+    setIsReady(true);
+    updateLoop();
   });
 
   onCleanup(() => {
+    fceux.reset();
+    fceux = null;
     cancelAnimationFrame(reqAnimationFrameTimer);
-    nesEmulator = null;
   });
 
-  return (
-    <canvas
-      width={screenWidth}
-      height={screenHeight}
-      ref={canvasRef}
-      class={styles.Game}
-    ></canvas>
-  );
+  return <canvas id="nescanvas" class={styles.Game}></canvas>;
 };
 
 export default Game;

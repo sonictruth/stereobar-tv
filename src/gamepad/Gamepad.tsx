@@ -30,6 +30,7 @@ let nesControllerMap: any = {
   'down-right': [5, 7],
 };
 
+
 const Gamepad: Component = () => {
   const params = useParams();
   const [error, setError] = createSignal('');
@@ -38,7 +39,6 @@ const Gamepad: Component = () => {
   const [playerIndex, setPlayerIndex] = createSignal(1);
   const [pin, setPin] = createSignal(params.pin || '');
 
-  let playerVirtualController: any;
   let peerClient: any;
   let peerConnection: any;
 
@@ -117,14 +117,15 @@ const Gamepad: Component = () => {
 
   const handleNesKey = (keyEvent: any) => {
     if (state() === State.Connected) {
-      const key = nesControllerMap[keyEvent.detail.btn];
+      const keys = nesControllerMap[keyEvent.detail.btn];
       let payload: PeerCommandKeyPayLoad = {
         s: keyEvent.detail.pressed,
+        k: keys,
         p: playerIndex(),
-        k: key,
       };
       const cmd: PeerCommand = { name: 'key', payload };
       peerConnection.send(cmd);
+
     }
   };
 
@@ -180,7 +181,9 @@ const Gamepad: Component = () => {
               Unload
             </div>
           </div>
-          <GamepadButtons onNesKey={(keyEvent:any) => handleNesKey(keyEvent)} />
+          <GamepadButtons
+            onNesKey={handleNesKey}
+          />
         </Match>
       </Switch>
     </div>
