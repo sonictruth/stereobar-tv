@@ -1,31 +1,21 @@
-import { Component, For } from 'solid-js';
+import { Component, For, Match, Switch } from 'solid-js';
 import { createSignal } from 'solid-js';
 import { onMount, onCleanup } from 'solid-js';
 import { Peer } from 'peerjs';
 import styles from './Gamepad.module.css';
-import './custom.css';
 import { useParams } from '@solidjs/router';
-import { PeerCommand, PeerCommandKeyPayLoad } from '../peerServer';
+import type { PeerCommand, PeerCommandKeyPayLoad } from '../peerServer';
+import { serverPeerIDPrefix } from '../peerServer';
+import GamepadButtons from './GamepadButtons';
 
-// @ts-ignore
-import NESCntlr from 'nes-cntlr';
+enum State {
+  Error = 'error',
+  Loading = 'loading',
+  Connected = 'connected',
+  Login = 'login',
+}
 
-let eventsArr = [
-  'up-left',
-  'up-right',
-  'down-left',
-  'down-right',
-  'up',
-  'right',
-  'left',
-  'down',
-  'b',
-  'a',
-  'select',
-  'start',
-];
-
-let jsNesControllerMap: any = {
+let nesControllerMap: any = {
   a: [0],
   b: [1],
   select: [2],
@@ -42,9 +32,12 @@ let jsNesControllerMap: any = {
 
 const Gamepad: Component = () => {
   const params = useParams();
+  const [error, setError] = createSignal('');
+  const [state, setState] = createSignal<State>(State.Login);
   const [gameList, setGameList] = createSignal(null);
   const [playerIndex, setPlayerIndex] = createSignal(1);
-  const serverId = params.serverID;
+  const [pin, setPin] = createSignal(params.pin || '');
+
   let playerVirtualController: any;
   let peerClient: any;
   let peerConnection: any;
@@ -56,14 +49,75 @@ const Gamepad: Component = () => {
     }
   };
 
-  const showFullScreen = () => {
-    document.body.requestFullscreen();
-    screen.orientation.lock('landscape-primary');
+  const switchFullScreen = async () => {
+    try {
+      document.body.requestFullscreen();
+      await screen.orientation.lock('landscape-primary');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const onKeyPress = (keyEvent: any) => {
-    if (peerConnection) {
-      const key = jsNesControllerMap[keyEvent.detail.btn];
+  const initPeer = () => {
+    setState(State.Loading);
+    peerClient = new Peer({
+      debug: 0,
+    });
+
+    peerClient.on('error', (error: any) => {
+      console.error('Peer Error', error.message);
+      setState(State.Error);
+      setError(error.message);
+    });
+
+    peerClient.on('disconnected', () => {
+      setState(State.Error);
+      setError('Disconnected');
+    });
+
+    peerClient.on('open', () => {
+      setState(State.Login);
+    });
+  };
+
+  const connectPeer = () => {
+    setState(State.Loading);
+    peerConnection = peerClient.connect(serverPeerIDPrefix + pin(), {
+      reliable: true,
+    });
+    peerConnection.on('error', (error: any) => {
+      console.error('Connection error', error);
+      setState(State.Error);
+      setError(error);
+    });
+    peerConnection.on('close', () => {
+      setState(State.Error);
+      setError('Connection closed');
+    });
+    peerConnection.on('open', async () => {
+      setState(State.Connected);
+      await switchFullScreen();
+      const cmd: PeerCommand = { name: 'pong' };
+      peerConnection.send(cmd);
+    });
+    peerConnection.on('data', (cmd: PeerCommand) => {
+      if (cmd.name === 'gameList') {
+        setGameList(cmd.payload);
+      }
+    });
+  };
+
+  onMount(() => {
+    initPeer();
+  });
+
+  onCleanup(() => {
+    peerClient.destroy();
+  });
+
+  const handleNesKey = (keyEvent: any) => {
+    if (state() === State.Connected) {
+      const key = nesControllerMap[keyEvent.detail.btn];
       let payload: PeerCommandKeyPayLoad = {
         s: keyEvent.detail.pressed,
         p: playerIndex(),
@@ -71,92 +125,69 @@ const Gamepad: Component = () => {
       };
       const cmd: PeerCommand = { name: 'key', payload };
       peerConnection.send(cmd);
-      if (keyEvent.detail.pressed && navigator.vibrate) {
-        navigator.vibrate(60);
-      }
     }
   };
 
-  onMount(() => {
-    playerVirtualController = new NESCntlr({
-      virtual: 'always',
-    });
-    eventsArr.forEach((event) => {
-      document.addEventListener(`player1:${event}`, onKeyPress);
-    });
-    playerVirtualController.init();
-
-    peerClient = new Peer({
-      debug: 0,
-    });
-
-    peerClient.on('error', (error: any) => {
-      console.error('Peer Error', error.message);
-    });
-
-    peerClient.on('disconnected', () => {
-      console.log('Peer Disconnected');
-    });
-
-    peerClient.on('open', () => {
-      peerConnection = peerClient.connect(serverId, {
-        reliable: true,
-      });
-      peerConnection.on('error', (error: any) => {
-        console.error('Connection error', error);
-      });
-      peerConnection.on('close', () => {
-        console.log('Connection closed');
-      });
-      peerConnection.on('open', () => {
-        const cmd: PeerCommand = { name: 'pong' };
-        peerConnection.send(cmd);
-      });
-      peerConnection.on('data', (cmd: PeerCommand) => {
-        if (cmd.name === 'gameList') {
-          setGameList(cmd.payload);
-        }
-      });
-    });
-  });
-
-  onCleanup(() => {
-    eventsArr.forEach((event) => {
-      document.removeEventListener(`player1:${event}`, onKeyPress);
-    });
-    playerVirtualController.destroyVirtualCntlr();
-    playerVirtualController = null;
-    peerClient.destroy();
-  });
-
   return (
     <div class={styles.GamePad}>
-      <div>Stereo BAR Player {playerIndex()}</div>
-      <For each={gameList()}>
-        {(game) => (
-          <div class={styles.GamePadButton} onClick={() => loadGame(game.id)}>
-            {game.name}
+      <div>Stereo BAR Gamepad</div>
+      <Switch>
+        <Match when={state() === State.Loading}>
+          <div>Loading...</div>
+        </Match>
+
+        <Match when={state() === State.Error}>
+          <div>{error()}</div>
+          <button onClick={() => setState(State.Login)}>OK</button>
+        </Match>
+
+        <Match when={state() === State.Login}>
+          <input
+            type="text"
+            size="4"
+            onInput={(e: any) => {
+              setPin(e.target.value);
+            }}
+            value={pin()}
+          />
+          <button onClick={() => connectPeer()}>OK</button>
+        </Match>
+
+        <Match when={state() === State.Connected}>
+          <For each={gameList()}>
+            {(game) => (
+              <div
+                class={styles.GamePadButton}
+                onClick={() => loadGame(game.id)}
+              >
+                {game.name}
+              </div>
+            )}
+          </For>
+          <div>
+            <div>
+              <div
+                class={styles.GamePadButton}
+                onClick={() => setPlayerIndex(playerIndex() === 1 ? 2 : 1)}
+              >
+                Play as {playerIndex() === 1 ? 2 : 1}
+              </div>
+            </div>
+            <div
+              class={styles.GamePadButton}
+              onClick={() => setState(State.Login)}
+            >
+              Unload
+            </div>
           </div>
-        )}
-      </For>
-      <div>
-        <div>
-          <div
-            class={styles.GamePadButton}
-            onClick={() => setPlayerIndex(playerIndex() === 1 ? 2 : 1)}
-          >
-            Play as {playerIndex() === 1 ? 2 : 1}
-          </div>
-        </div>
-        <div class={styles.GamePadButton} onClick={() => loadGame('')}>
-          Unload
-        </div>
-        <div class={styles.GamePadButton} onClick={() => showFullScreen()}>
-          Fullscreen
-        </div>
-      </div>
+          <GamepadButtons onNesKey={(keyEvent:any) => handleNesKey(keyEvent)} />
+        </Match>
+      </Switch>
     </div>
   );
 };
 
 export default Gamepad;
+/*
+  
+       */

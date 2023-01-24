@@ -1,0 +1,13 @@
+.GamepadConnectionInfo {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  z-index: 9000000;
+}
+
+.GamepadConnectionInfo a {
+  color: white;
+  text-decoration: none;
+  font-size: 2em;
+}
+

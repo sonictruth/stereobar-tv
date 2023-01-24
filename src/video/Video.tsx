@@ -4,9 +4,7 @@ import styles from './Video.module.css';
 
 import VideoBackground from './VideoBackground';
 import TrackInfo from './TrackInfo';
-
-import peerServer from '../peerServer';
-import GameInfo from './GameInfo';
+import GamepadConnectionInfo from './GamepadConnectionInfo';
 
 const animateTracksIntervalMs = 5000;
 const updateTracksIntervalMs = 25000;
@@ -91,7 +89,7 @@ const Video: Component = () => {
   return (
     <div class={styles.Video}>
       <div class={styles.Title}>Stereo Bar TV</div>
-      <GameInfo url={peerServer.gamepadURL()} />
+      <GamepadConnectionInfo/>
       <div class={styles.Slider}>
         <div ref={currentTrackEl}>
           <TrackInfo data={currentTrack()} />
@@ -100,7 +98,6 @@ const Video: Component = () => {
           <TrackInfo data={lastTrack()} />
         </div>
       </div>
-
       <VideoBackground />
     </div>
   );

@@ -14,65 +14,69 @@ export interface PeerCommandKeyPayLoad {
   p: number;
 }
 
+const [gamepadPin, setGamepadPin] = createSignal<any>(null);
+
 const [listenPeerCommand, emitPeerCommand, clearPeerCommands] =
   createSimpleEmitter<PeerCommand>();
 
-const generateID = () => {
-  return 'sbar-' + Math.random().toString(36).slice(8);
+const gamepadURLPrefix =
+  document.location.protocol +
+  '//' +
+  document.location.host +
+  document.location.pathname +
+  '#/gamepad/';
+const serverPeerIDPrefix = 'sbar-j3k2lp1-';
+
+const generatePin = () => {
+  return Math.random().toString().substring(2, 6);
 };
 
-const getGamepadURLFromID = (id: string) => {
-  return (
-    document.location.protocol +
-    '//' +
-    document.location.host +
-    document.location.pathname +
-    '#/gamepad/' +
-    id
-  );
+const connect = () => {
+  const pin = generatePin();
+  const serverPeerID = serverPeerIDPrefix + pin;
+  let peerServer = new Peer(serverPeerID, {
+    debug: 0,
+  });
+  peerServer.on('error', (error) => {
+    console.error('Error', error);
+  });
+  peerServer.on('disconnected', () => {
+    console.log('Disconected');
+    setGamepadPin(null);
+    peerServer.reconnect();
+  });
+  peerServer.on('open', (id) => {
+    setGamepadPin(pin);
+    const url = gamepadURLPrefix + pin;
+    console.log('Gamepad URL:', url);
+  });
+  peerServer.on('connection', (conn) => {
+    console.log('New Connection', conn.peer);
+    conn.on('close', () => {
+      console.log('Peer closed', conn.peer);
+    });
+    conn.on('error', (error) => {
+      console.log('Peer error', conn.peer, error);
+    });
+    conn.on('open', () => {
+      const peerCommand: PeerCommand = {
+        name: 'gameList',
+        payload: gameList,
+      };
+      conn.send(peerCommand);
+    });
+    conn.on('data', (data) => {
+      emitPeerCommand(<PeerCommand>data);
+    });
+  });
 };
 
-function createPeerServer() {
-  const [gamepadURL, setGamepadURL] = createSignal<any>(null);
+const signals = createRoot(() => ({ gamepadPin }));
 
-  const connect = () => {
-    let peerServer = new Peer(generateID(), {
-      debug: 0,
-    });
-    peerServer.on('error', (error) => {
-      console.error('Error', error);
-    });
-    peerServer.on('disconnected', () => {
-      console.log('Disconected');
-      peerServer.reconnect();
-    });
-    peerServer.on('open', (id) => {
-      const url = getGamepadURLFromID(id);
-      setGamepadURL(url);
-      console.log('Gamepad URL:', url);
-    });
-    peerServer.on('connection', (conn) => {
-      console.log('New Connection', conn.peer);
-      conn.on('close', () => {
-        console.log('Peer closed', conn.peer);
-      });
-      conn.on('error', (error) => {
-        console.log('Peer error', conn.peer, error);
-      });
-      conn.on('open', () => {
-        const peerCommand: PeerCommand = {
-          name: 'gameList',
-          payload: gameList,
-        };
-        conn.send(peerCommand);
-      });
-      conn.on('data', (data) => {
-        emitPeerCommand(<PeerCommand>data);
-      });
-    });
-  };
-  return { connect, gamepadURL };
-}
-
-export { listenPeerCommand };
-export default createRoot(createPeerServer);
+export {
+  listenPeerCommand,
+  serverPeerIDPrefix,
+  gamepadURLPrefix,
+  connect,
+  signals,
+};
