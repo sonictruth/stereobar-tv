@@ -70,8 +70,10 @@ const Game: Component = () => {
   });
 
   onCleanup(() => {
-    fceux.reset();
-    fceux = null;
+    if(fceux) {
+      fceux.reset();
+      fceux = null;
+    }
     cancelAnimationFrame(reqAnimationFrameTimer);
   });
 

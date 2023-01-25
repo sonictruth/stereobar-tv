@@ -1,19 +1,44 @@
-// @ts-ignore
+
 import tetris from '../assets/roms/tetris.nes';
-// @ts-ignore
 import smb from '../assets/roms/smb.nes';
-// @ts-ignore
-import smb3 from '../assets/roms/smb3.nes';
-// @ts-ignore
-import o1942 from '../assets/roms/1942.nes';
-// @ts-ignore
 import drmario from '../assets/roms/drmario.nes';
+import test from '../assets/roms/test.nes';
+import zelda from '../assets/roms/zelda.nes';
+import puzznic from '../assets/roms/puzznic.nes';
+import kickle from '../assets/roms/kickle.nes';
+import bomberman from '../assets/roms/bomberman.nes';
+import battleship from '../assets/roms/battleship.nes';
 
 export default [
+  {
+    id: 'battleship',
+    url: battleship,
+    name: 'Battleship',
+  },
+  {
+    id: 'bomberman',
+    url: bomberman,
+    name: 'Bomberman',
+  },
+  {
+    id: 'zelda',
+    url: zelda,
+    name: 'Zelda',
+  },
   {
     id: 'drmario',
     url: drmario,
     name: 'Dr.Mario',
+  },
+  {
+    id: 'kickle',
+    url: kickle,
+    name: 'Kickle Cubicle',
+  },
+  {
+    id: 'puzznic',
+    url: puzznic,
+    name: 'Puzznic',
   },
   {
     id: 'tetris',
@@ -26,13 +51,8 @@ export default [
     name: 'Super Mario',
   },
   {
-    id: '1942',
-    url: o1942,
-    name: '1942',
-  },
-  {
     id: 'tctrl',
-    url: smb3,
+    url: test,
     name: 'Test Ctrl',
   },
 ];

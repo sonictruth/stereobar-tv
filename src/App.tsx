@@ -16,7 +16,7 @@ import Video from './video/Video';
 import Gamepad from './gamepad/Gamepad';
 import Game from './game/Game';
 
-const returnToVideoTimeoutMs = 30000;
+const returnToVideoTimeoutMs = 630000;
 
 const App: Component = () => {
   const location = useLocation();

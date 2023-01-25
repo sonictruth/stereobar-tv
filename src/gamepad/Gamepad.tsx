@@ -1,9 +1,9 @@
-import { Component, For, Match, Switch, createEffect } from 'solid-js';
+import { Component, For, Match, Switch } from 'solid-js';
 import { createSignal } from 'solid-js';
 import { onMount, onCleanup } from 'solid-js';
 import { Peer } from 'peerjs';
 import styles from './Gamepad.module.css';
-import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import type { PeerCommand, PeerCommandKeyPayLoad } from '../peerServer';
 import { serverPeerIDPrefix } from '../peerServer';
 import GamepadButtons from './GamepadButtons';
@@ -183,25 +183,29 @@ const Gamepad: Component = () => {
         </Match>
 
         <Match when={state() === State.Connected}>
-          <For each={gameList()}>
-            {(game) => (
-              <div
-                class={styles.GamePadButton}
-                onClick={() => loadGame(game.id)}
-              >
-                {game.name}
-              </div>
-            )}
-          </For>
+          <select
+            class={styles.GameSelect}
+            onInput={(e) => {
+              loadGame(e.currentTarget.value);
+            }}
+          >
+            <option selected disabled >
+              -- Select Game --
+            </option>
+            <For each={gameList()}>
+              {(game) => <option value={game.id}>{game.name}</option>}
+            </For>
+          </select>
+
           <div>
             <div>
               <div
                 class={styles.GamePadButton}
                 onClick={() => setPlayerIndex(playerIndex() === 1 ? 2 : 1)}
               >
-                Player: {playerIndex()}
+                Switch to controller {playerIndex() === 1 ? 2 : 1}
               </div>
-
+              <br />
               <div class={styles.GamePadButton} onClick={() => ping()}>
                 Ping {elapsed()}
               </div>
