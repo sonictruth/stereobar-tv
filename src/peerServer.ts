@@ -25,7 +25,7 @@ const gamepadURLPrefix =
   document.location.host +
   document.location.pathname +
   '#/gamepad/';
-const serverPeerIDPrefix = 'sbar-j3k2lp1-';
+const serverPeerIDPrefix = 'sbar-phAxB-';
 
 const generatePin = () => {
   return Math.random().toString().substring(2, 6);

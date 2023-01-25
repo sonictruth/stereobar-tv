@@ -1,9 +1,9 @@
-import { Component, For, Match, Switch } from 'solid-js';
+import { Component, For, Match, Switch, createEffect } from 'solid-js';
 import { createSignal } from 'solid-js';
 import { onMount, onCleanup } from 'solid-js';
 import { Peer } from 'peerjs';
 import styles from './Gamepad.module.css';
-import { useParams } from '@solidjs/router';
+import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
 import type { PeerCommand, PeerCommandKeyPayLoad } from '../peerServer';
 import { serverPeerIDPrefix } from '../peerServer';
 import GamepadButtons from './GamepadButtons';
@@ -32,6 +32,7 @@ let nesControllerMap: any = {
 
 const Gamepad: Component = () => {
   const params = useParams();
+  const navigate = useNavigate();
   const [error, setError] = createSignal('');
   const [state, setState] = createSignal<State>(State.Login);
   const [gameList, setGameList] = createSignal(null);
@@ -120,11 +121,11 @@ const Gamepad: Component = () => {
     });
   };
 
-  const ping = ()=> {
+  const ping = () => {
     setElapsed('');
     pingTime = performance.now();
-    peerConnection.send({ name: 'ping'});
-  }
+    peerConnection.send({ name: 'ping' });
+  };
 
   onMount(() => {
     initPeer();
@@ -158,7 +159,14 @@ const Gamepad: Component = () => {
 
         <Match when={state() === State.Error}>
           <div>{error()}</div>
-          <button onClick={() => document.location.reload()}>OK</button>
+          <button
+            onClick={() => {
+              navigate('/gamepad/' + pin());
+              setState(State.Login);
+            }}
+          >
+            OK
+          </button>
         </Match>
 
         <Match when={state() === State.Login}>
@@ -194,10 +202,7 @@ const Gamepad: Component = () => {
                 Player: {playerIndex()}
               </div>
 
-              <div
-                class={styles.GamePadButton}
-                onClick={() => ping()}
-              >
+              <div class={styles.GamePadButton} onClick={() => ping()}>
                 Ping {elapsed()}
               </div>
             </div>

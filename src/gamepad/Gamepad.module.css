@@ -27,7 +27,7 @@
   border: 1px solid darkgrey;
   border-radius: 5px;
   color: white;
-
+  font-size: 20px;
 }
 
 .GamePad input {
@@ -35,4 +35,5 @@
   border: 1px solid darkgrey;
   border-radius: 5px;
   color: white;
+  font-size: 20px;
 }
