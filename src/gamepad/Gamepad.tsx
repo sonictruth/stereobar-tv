@@ -162,7 +162,7 @@ const Gamepad: Component = () => {
           <button
             onClick={() => {
               navigate('/gamepad/' + pin());
-              setState(State.Login);
+              document.location.reload();
             }}
           >
             OK
@@ -215,6 +215,3 @@ const Gamepad: Component = () => {
 };
 
 export default Gamepad;
-/*
-  
-       */
