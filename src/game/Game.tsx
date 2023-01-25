@@ -28,6 +28,7 @@ const Game: Component = () => {
       if (gameInfo) {
         controllerBits = 0;
         await fceux.reset();
+        fceux.setConfig('system-port-2', 'controller');
         await fceux.downloadGame(gameInfo.url);
       } else {
         console.error('No game found');

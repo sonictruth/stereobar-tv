@@ -1,12 +1,9 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import './custom.css';
-// @ts-ignore
-import NESCntlr from 'nes-cntlr';
+import './GamepadButtons.css';
 
 type props = {
   onNesKey: Function;
 };
-const globalNesPropertyName = '_nesctrl';
 
 let eventsArr = [
   'up-left',
@@ -23,45 +20,90 @@ let eventsArr = [
   'start',
 ];
 
-
 const GamepadButtons: Component<props> = (props) => {
-  let gamepadEl: HTMLDivElement | null;
-
-  const onKeyPress = (keyEvent: any) => {
-    props.onNesKey(keyEvent);
-    if (keyEvent.detail.pressed && navigator.vibrate) {
-      navigator.vibrate(80);
+  let buttonsPadRef: HTMLDivElement | undefined;
+  const handleTouch = (event: TouchEvent) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest('button') as HTMLElement;
+    if (button && button.dataset.btn) {
+      const keyEvent = {
+        pressed: event.type === 'touchstart' ? true : false,
+        btn: button.dataset.btn,
+      };
+      console.log(keyEvent);
+      props.onNesKey(keyEvent);
+      if (keyEvent.pressed && navigator.vibrate) {
+        navigator.vibrate(80);
+      }
     }
+    event.preventDefault();
   };
 
   onMount(() => {
-    // @ts-ignore
-    if (!window[globalNesPropertyName]) {
-      // @ts-ignore
-      window[globalNesPropertyName] = new NESCntlr({
-        virtual: 'always',
-      });
-      // @ts-ignore
-      window[globalNesPropertyName].init();
-    }
-    eventsArr.forEach((event) => {
-      document.addEventListener(`player1:${event}`, onKeyPress);
+    buttonsPadRef?.addEventListener('touchstart', handleTouch, {
+      passive: false,
     });
-    gamepadEl = document.querySelector('.cntlr');
-    if (gamepadEl) {
-      gamepadEl.style.visibility = '';
-    }
+    buttonsPadRef?.addEventListener('touchend', handleTouch, {
+      passive: false,
+    });
   });
+
   onCleanup(() => {
-    eventsArr.forEach((event) => {
-      document.removeEventListener(`player1:${event}`, onKeyPress);
-    });
-    console.log(gamepadEl);
-    if (gamepadEl) {
-      gamepadEl.style.visibility = 'hidden';
-    }
+    buttonsPadRef?.removeEventListener('touchstart', handleTouch);
+    buttonsPadRef?.removeEventListener('touchend', handleTouch);
   });
-  return <></>;
+
+  return (
+    <div ref={buttonsPadRef} class="gp">
+      <table class="dpad">
+        <tbody>
+          <tr>
+            <td></td>
+            <td>
+              <button data-btn="up" class="button-axes axes-U">
+                <i class="arrow arrow-up"></i>
+              </button>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>
+              <button data-btn="left" class="button-axes axes-L">
+                <i class="arrow arrow-left"></i>
+              </button>
+            </td>
+            <td>
+              <button data-btn="down" class="button-axes axes-D">
+                <i class="arrow arrow-down"></i>
+              </button>
+            </td>
+            <td>
+              <button data-btn="right" class="button-axes axes-R">
+                <i class="arrow arrow-right"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="buttons2">
+        <button data-btn="select" class="button-bar-mini button-SELECT">
+          SELECT
+        </button>
+        <button data-btn="start" class="button-bar-mini button-SELECT">
+          START
+        </button>
+      </div>
+      <div class="buttons1">
+        <button data-btn="b" class="button-circle button-B">
+          B
+        </button>
+        <button data-btn="a" class="button-circle button-A">
+          A
+        </button>
+      </div>
+
+    </div>
+  );
 };
 
 export default GamepadButtons;

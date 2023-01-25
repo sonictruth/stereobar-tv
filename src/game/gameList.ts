@@ -7,9 +7,14 @@ import smb3 from '../assets/roms/smb3.nes';
 // @ts-ignore
 import o1942 from '../assets/roms/1942.nes';
 // @ts-ignore
-import drmario from '../assets/drmario.nes';
+import drmario from '../assets/roms/drmario.nes';
 
 export default [
+  {
+    id: 'drmario',
+    url: drmario,
+    name: 'Dr.Mario',
+  },
   {
     id: 'tetris',
     url: tetris,
@@ -21,13 +26,13 @@ export default [
     name: 'Super Mario',
   },
   {
-    id: 'smb3',
-    url: smb3,
-    name: 'Super Mario 3',
-  },
-  {
     id: '1942',
     url: o1942,
     name: '1942',
+  },
+  {
+    id: 'tctrl',
+    url: smb3,
+    name: 'Test Ctrl',
   },
 ];

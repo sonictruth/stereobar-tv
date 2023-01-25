@@ -30,7 +30,6 @@ let nesControllerMap: any = {
   'down-right': [5, 7],
 };
 
-
 const Gamepad: Component = () => {
   const params = useParams();
   const [error, setError] = createSignal('');
@@ -82,18 +81,18 @@ const Gamepad: Component = () => {
 
   const connectPeer = () => {
     setState(State.Loading);
-    console.log(peerClient.connect);
+
     peerConnection = peerClient.connect(serverPeerIDPrefix + pin(), {
       // FIXME: Ordered ?
       reliable: true,
       ordered: true,
       _payload: {
         reliable: true,
-        ordered: true,  
+        ordered: true,
         originator: true,
-      }
+      },
     });
-    console.log(peerConnection);
+
     peerConnection.on('error', (error: any) => {
       console.error('Connection error', error);
       setState(State.Error);
@@ -126,15 +125,15 @@ const Gamepad: Component = () => {
 
   const handleNesKey = (keyEvent: any) => {
     if (state() === State.Connected) {
-      const keys = nesControllerMap[keyEvent.detail.btn];
+      const keys = nesControllerMap[keyEvent.btn];
       let payload: PeerCommandKeyPayLoad = {
-        s: keyEvent.detail.pressed,
+        s: keyEvent.pressed,
         k: keys,
         p: playerIndex(),
       };
+
       const cmd: PeerCommand = { name: 'key', payload };
       peerConnection.send(cmd);
-
     }
   };
 
@@ -153,6 +152,7 @@ const Gamepad: Component = () => {
 
         <Match when={state() === State.Login}>
           <input
+            placeholder="PIN"
             type="text"
             size="4"
             onInput={(e: any) => {
@@ -180,19 +180,11 @@ const Gamepad: Component = () => {
                 class={styles.GamePadButton}
                 onClick={() => setPlayerIndex(playerIndex() === 1 ? 2 : 1)}
               >
-                Play as {playerIndex() === 1 ? 2 : 1}
+                Player: {playerIndex()}
               </div>
             </div>
-            <div
-              class={styles.GamePadButton}
-              onClick={() => setState(State.Login)}
-            >
-              Unload
-            </div>
           </div>
-          <GamepadButtons
-            onNesKey={handleNesKey}
-          />
+          <GamepadButtons onNesKey={handleNesKey} />
         </Match>
       </Switch>
     </div>

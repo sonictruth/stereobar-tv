@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css?family=Work+Sans:400,700,900');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+.gp {
+  touch-action: none;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  user-select: none;
+  width: 100%;
+}
+.gp .dpad {
+  flex-shrink: 1;
+}
+.gp .buttons1{
+
+}
+.gp .buttons2{
+  flex-grow: 4;
+}
+
+.gp table,
+.gp tr,
+.gp td {
+  padding: 0;
+  margin: 0;
+  border-spacing: 0px;
+}
+
+.gp button {
+  font-family: 'Work Sans', sans-serif;
+  display: inline-block;
+  border: 0;
+  background: #bab9b9;
+  color: #6c7073;
+  font-weight: 600;
+  border-radius: 1.7em;
+  width: 1.7em;
+  height: 1.7em;
+  font-size: 1.7em;
+  outline: none;
+  border-bottom: 0.15em solid rgba(0, 0, 0, 0.5);
+}
+
+.gp button.active,
+.gp button:active {
+  border-bottom: 0.15em solid transparent;
+  transform: scale(0.9);
+}
+
+.gp .button-circle {
+  color: #fff;
+}
+
+.gp .button-bar {
+  width: 7em;
+  font-size: 1.3em;
+}
+
+.gp .button-axes,
+.gp .button-bar-mini {
+  background: #222;
+  color: white;
+}
+
+.gp .button-axes {
+  width: 1.3em;
+  height: 1.4em;
+  line-height: 1.3;
+  border-radius: 0.2em;
+  color: #666;
+}
+
+.gp .button-bar-mini {
+  width: 6em;
+  font-size: 0.75em;
+  background: #222;
+  color: white;
+  font-weight: 300;
+  border-bottom: 0.3em solid rgba(0, 0, 0, 0.5);
+}
+
+.gp .button-bar-mini.active,
+.gp .button-bar-mini:active {
+  border-bottom: 0.3em solid transparent;
+}
+
+.gp .button-A {
+  background: #ed1d29;
+}
+.gp .button-B {
+  background: #ffb930;
+}
+.gp .button-X {
+  background: #025ac9;
+}
+.gp .button-Y {
+  background: #00a97a;
+}
+
+.gp button .arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  vertical-align: middle;
+  font-size: 0.35em;
+  line-height: 0;
+  border-color: rgba(0, 0, 0, 0.5);
+  border: 0 solid transparent;
+  color: inherit;
+}
+.gp button .arrow-left {
+  border-right-color: #999;
+  border-right-width: 1em;
+  border-bottom-width: 1em;
+  border-top-width: 1em;
+  margin-left: -0.25em;
+}
+.gp button .arrow-right {
+  border-left-color: #999;
+  border-left-width: 1em;
+  border-bottom-width: 1em;
+  border-top-width: 1em;
+  margin-right: -0.25em;
+}
+.gp button .arrow-up {
+  border-bottom-color: #999;
+  border-bottom-width: 1em;
+  border-left-width: 1em;
+  border-right-width: 1em;
+  margin-top: -0.25em;
+}
+.gp button .arrow-down {
+  border-top-color: #999;
+  border-top-width: 1em;
+  border-left-width: 1em;
+  border-right-width: 1em;
+  margin-bottom: -0.25em;
+}
+
+.gp .button-bar-mini,
+.gp .button-circle {
+  margin-left: 10px;
+  margin-top: 20px;
+}
