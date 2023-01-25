@@ -121,6 +121,7 @@ const Gamepad: Component = () => {
   };
 
   const ping = ()=> {
+    setElapsed('');
     pingTime = performance.now();
     peerConnection.send({ name: 'ping'});
   }
