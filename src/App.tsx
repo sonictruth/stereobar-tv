@@ -16,11 +16,18 @@ import Video from './video/Video';
 import Gamepad from './gamepad/Gamepad';
 import Game from './game/Game';
 
+const returnToVideoTimeoutMs = 30000;
+
 const App: Component = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  let timeoutTimer: any;
 
+  const returnToVideoOnTimeout = () => {
+    navigate('/video');
+  };
   const onPeerCommand = (peerCommand: PeerCommand) => {
+    clearTimeout(timeoutTimer);
     switch (peerCommand.name) {
       case 'loadGame':
         const gameID = peerCommand.payload;
@@ -31,6 +38,10 @@ const App: Component = () => {
         }
         break;
     }
+    timeoutTimer = setTimeout(
+      () => returnToVideoOnTimeout(),
+      returnToVideoTimeoutMs,
+    );
   };
 
   onMount(() => {
@@ -39,8 +50,10 @@ const App: Component = () => {
     }
     listenPeerCommand((peerCommand) => onPeerCommand(peerCommand));
   });
-  
-  onCleanup(() => {});
+
+  onCleanup(() => {
+    clearTimeout(timeoutTimer);
+  });
   return (
     <div class={styles.App}>
       <Routes>
