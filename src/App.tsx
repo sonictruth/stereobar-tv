@@ -45,7 +45,7 @@ const App: Component = () => {
   };
 
   onMount(() => {
-    if (!location.pathname.includes('gamepad')) {
+    if (!location.pathname.includes('/gamepad') && location.pathname !== '/') {
       peerServerConnect();
     }
     listenPeerCommand((peerCommand) => onPeerCommand(peerCommand));
@@ -54,6 +54,7 @@ const App: Component = () => {
   onCleanup(() => {
     clearTimeout(timeoutTimer);
   });
+
   return (
     <div class={styles.App}>
       <Routes>
