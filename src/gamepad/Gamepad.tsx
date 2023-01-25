@@ -157,7 +157,7 @@ const Gamepad: Component = () => {
 
         <Match when={state() === State.Error}>
           <div>{error()}</div>
-          <button onClick={() => setState(State.Login)}>OK</button>
+          <button onClick={() => document.location.reload()}>OK</button>
         </Match>
 
         <Match when={state() === State.Login}>
