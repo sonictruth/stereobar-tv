@@ -35,11 +35,13 @@ const Gamepad: Component = () => {
   const [error, setError] = createSignal('');
   const [state, setState] = createSignal<State>(State.Login);
   const [gameList, setGameList] = createSignal(null);
+  const [elapsed, setElapsed] = createSignal('');
   const [playerIndex, setPlayerIndex] = createSignal(1);
   const [pin, setPin] = createSignal(params.pin || '');
 
   let peerClient: any;
   let peerConnection: any;
+  let pingTime = performance.now();
 
   const loadGame = (gameID: string) => {
     if (peerConnection) {
@@ -112,8 +114,16 @@ const Gamepad: Component = () => {
       if (cmd.name === 'gameList') {
         setGameList(cmd.payload);
       }
+      if (cmd.name === 'pong') {
+        setElapsed((performance.now() - pingTime).toFixed(2) + 'ms');
+      }
     });
   };
+
+  const ping = ()=> {
+    pingTime = performance.now();
+    peerConnection.send({ name: 'ping'});
+  }
 
   onMount(() => {
     initPeer();
@@ -181,6 +191,13 @@ const Gamepad: Component = () => {
                 onClick={() => setPlayerIndex(playerIndex() === 1 ? 2 : 1)}
               >
                 Player: {playerIndex()}
+              </div>
+
+              <div
+                class={styles.GamePadButton}
+                onClick={() => ping()}
+              >
+                Ping {elapsed()}
               </div>
             </div>
           </div>

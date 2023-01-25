@@ -66,7 +66,11 @@ const connect = () => {
       conn.send(peerCommand);
     });
     conn.on('data', (data) => {
-      emitPeerCommand(<PeerCommand>data);
+      const cmd = <PeerCommand>data;
+      emitPeerCommand(cmd);
+      if(cmd.name === 'ping') {
+        conn.send({name: 'pong'});
+      }
     });
   });
 };
