@@ -48,3 +48,16 @@
   color: white;
   font-size: 20px;
 }
+
+.Error {
+  font-size: 0.6em;
+  color: darkred;
+}
+
+
+.Title {
+  font-size: 1.2em;
+  color: darkred;
+  -webkit-text-stroke: 2px darkgray;
+  -webkit-text-fill-color: darkred;
+}

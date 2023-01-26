@@ -32,6 +32,11 @@ export default [
     name: 'PeekABoo Poker',
   },
   {
+    id: 'monopoly',
+    url: monopoly,
+    name: 'Monopoly',
+  },
+  {
     id: 'caesarpalace',
     url: caesarpalace,
     name: 'Caesar Palace',
@@ -62,12 +67,6 @@ export default [
     url: chesmaster,
     name: 'Chessmaster',
   },
-
-  {
-    id: 'monopoly',
-    url: monopoly,
-    name: 'Monopoly',
-  },
   {
     id: 'othello',
     url: othello,
@@ -95,11 +94,6 @@ export default [
     name: 'Bomberman',
   },
   {
-    id: 'zelda',
-    url: zelda,
-    name: 'Zelda',
-  },
-  {
     id: 'kickle',
     url: kickle,
     name: 'Kickle Cubicle',
@@ -108,6 +102,11 @@ export default [
     id: 'puzznic',
     url: puzznic,
     name: 'Puzznic',
+  },
+  {
+    id: 'zelda',
+    url: zelda,
+    name: 'Zelda',
   },
   {
     id: 'drmario',

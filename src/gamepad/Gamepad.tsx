@@ -151,14 +151,14 @@ const Gamepad: Component = () => {
 
   return (
     <div class={styles.GamePad}>
-      <div>Stereo Bar Arcade</div>
+      <div class={styles.Title}>Stereo Bar Arcade</div>
       <Switch>
         <Match when={state() === State.Loading}>
-          <div>Loading...</div>
+          <div><span class="loader"></span></div>
         </Match>
 
         <Match when={state() === State.Error}>
-          <div>{error()}</div>
+          <div class={styles.Error}>{error()}</div>
           <button
             onClick={() => {
               navigate('/gamepad/' + pin());
