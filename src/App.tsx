@@ -16,15 +16,16 @@ import Video from './video/Video';
 import Gamepad from './gamepad/Gamepad';
 import Game from './game/Game';
 
-const returnToVideoTimeoutMs = 630000;
+const returnToVideoTimeoutMs = 180000;
 
 const App: Component = () => {
   const location = useLocation();
   const navigate = useNavigate();
   let timeoutTimer: any;
-
-  const returnToVideoOnTimeout = () => {
-    navigate('/video');
+  const returnToVideoOnTimeout = (returnLocation = '/video') => {
+    if (location.pathname !== returnLocation) {
+      navigate(returnLocation);
+    }
   };
   const onPeerCommand = (peerCommand: PeerCommand) => {
     clearTimeout(timeoutTimer);
