@@ -5,32 +5,28 @@ type props = {
   onNesKey: Function;
 };
 
-let eventsArr = [
-  'up-left',
-  'up-right',
-  'down-left',
-  'down-right',
-  'up',
-  'right',
-  'left',
-  'down',
-  'b',
-  'a',
-  'select',
-  'start',
-];
-
 const GamepadButtons: Component<props> = (props) => {
   let buttonsPadRef: HTMLDivElement | undefined;
+
+  const htmlPressEvents: string[] = [
+    'touchstart',
+    'touchend',
+    'mousedown',
+    'mouseup',
+  ];
+
   const handleTouch = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     const button = target.closest('button') as HTMLElement;
     if (button && button.dataset.btn) {
+      const isPressed = ['touchstart', 'mousedown'].includes(event.type)
+        ? true
+        : false;
       const keyEvent = {
-        pressed: event.type === 'touchstart' ? true : false,
+        pressed: isPressed,
         btn: button.dataset.btn,
       };
-      console.log(keyEvent);
+      console.log(event.type, keyEvent);
       props.onNesKey(keyEvent);
       if (keyEvent.pressed && navigator.vibrate) {
         navigator.vibrate(80);
@@ -40,17 +36,17 @@ const GamepadButtons: Component<props> = (props) => {
   };
 
   onMount(() => {
-    buttonsPadRef?.addEventListener('touchstart', handleTouch, {
-      passive: false,
-    });
-    buttonsPadRef?.addEventListener('touchend', handleTouch, {
-      passive: false,
+    htmlPressEvents.forEach((eventName: any) => {
+      buttonsPadRef?.addEventListener(eventName, handleTouch, {
+        passive: false,
+      });
     });
   });
 
   onCleanup(() => {
-    buttonsPadRef?.removeEventListener('touchstart', handleTouch);
-    buttonsPadRef?.removeEventListener('touchend', handleTouch);
+    htmlPressEvents.forEach((eventName: any) => {
+      buttonsPadRef?.removeEventListener(eventName, handleTouch);
+    });
   });
 
   return (
@@ -101,7 +97,6 @@ const GamepadButtons: Component<props> = (props) => {
           A
         </button>
       </div>
-
     </div>
   );
 };

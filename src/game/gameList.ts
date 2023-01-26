@@ -18,12 +18,23 @@ import monopoly from '../assets/roms/monopoly.nes';
 import othello from '../assets/roms/othello.nes';
 import spot from '../assets/roms/spot.nes';
 import vegasdream from '../assets/roms/vegasdream.nes';
+import peek from '../assets/roms/peek.nes';
 
 export default [
   {
     id: 'hotslots',
     url: hotslots,
     name: 'Hot Slots',
+  },
+  {
+    id: 'peek',
+    url: peek,
+    name: 'PeekABoo Poker',
+  },
+  {
+    id: 'caesarpalace',
+    url: caesarpalace,
+    name: 'Caesar Palace',
   },
   {
     id: 'battleship',
@@ -61,11 +72,6 @@ export default [
     id: 'othello',
     url: othello,
     name: 'Othello',
-  },
-  {
-    id: 'caesarpalace',
-    url: caesarpalace,
-    name: 'Caesar Palace',
   },
   {
     id: 'spot',

@@ -7,7 +7,7 @@
     "dev": "vite --host",
     "build": "rm -rf ./dist; vite build --base=./",
     "serve": "vite preview",
-    "deploy": "npm run build; cp token.php ./dist; rsync -a --rsh='ssh -p2222' dist/ root@107.173.25.162:/var/www/html/stereobar"
+    "deploy": "npm run build; cp token.php ./dist; rsync -a --delete --rsh='ssh -p2222' dist/ root@107.173.25.162:/var/www/html/stereobar"
   },
   "license": "MIT",
   "devDependencies": {
