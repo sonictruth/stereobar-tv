@@ -151,7 +151,7 @@ const Gamepad: Component = () => {
 
   return (
     <div class={styles.GamePad}>
-      <div>Stereo BAR Gamepad</div>
+      <div>Stereo Bar Arcade</div>
       <Switch>
         <Match when={state() === State.Loading}>
           <div>Loading...</div>
