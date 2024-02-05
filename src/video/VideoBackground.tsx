@@ -2,7 +2,7 @@ import type { Component } from 'solid-js';
 
 import styles from './VideoBackground.module.css';
 
-const youtubePlaylistID = 'PLywsZdsYYHTZxr0KhrQPkCkGuoPGgdQMg';
+const youtubePlaylistID = 'PLAYHOPLOMODr7T-fXc57dyrDwpx8XI9KI';
 const youtubeURL =
   'https://www.youtube.com/embed/videoseries?list=' +
   youtubePlaylistID +

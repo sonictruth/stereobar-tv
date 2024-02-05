@@ -22,6 +22,26 @@ import peek from '../assets/roms/peek.nes';
 
 export default [
   {
+    id: 'bomberman',
+    url: bomberman,
+    name: 'Bomberman',
+  },
+  {
+    id: 'spot',
+    url: spot,
+    name: 'Spot',
+  },
+  {
+    id: 'battleship',
+    url: battleship,
+    name: 'Battleship',
+  },
+  {
+    id: 'monopoly',
+    url: monopoly,
+    name: 'Monopoly',
+  },
+  {
     id: 'hotslots',
     url: hotslots,
     name: 'Hot Slots',
@@ -31,20 +51,11 @@ export default [
     url: peek,
     name: 'PeekABoo Poker',
   },
-  {
-    id: 'monopoly',
-    url: monopoly,
-    name: 'Monopoly',
-  },
+
   {
     id: 'caesarpalace',
     url: caesarpalace,
     name: 'Caesar Palace',
-  },
-  {
-    id: 'battleship',
-    url: battleship,
-    name: 'Battleship',
   },
   {
     id: 'anticipation',
@@ -73,11 +84,6 @@ export default [
     name: 'Othello',
   },
   {
-    id: 'spot',
-    url: spot,
-    name: 'Spot',
-  },
-  {
     id: 'vegasdream',
     url: vegasdream,
     name: 'Vegas Dream',
@@ -87,11 +93,6 @@ export default [
     id: 'casinokid',
     url: casinokid,
     name: 'Casino Kid',
-  },
-  {
-    id: 'bomberman',
-    url: bomberman,
-    name: 'Bomberman',
   },
   {
     id: 'kickle',
