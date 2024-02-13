@@ -1,34 +1,11 @@
-## Usage
+StereoBar TV 📺
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+StereoBar TV is a SolidJs web application that runs on an Android TV browser connected to a mini CRT TV. 
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+By default, it plays a YouTube playlist and uses the last.fm API to overlay the current song playing on Spotify.
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+You can also play games using a Nintendo NES emulator and use your phone as a controller. 
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+The connection between the phone and the webpage is established using WebRTC, with no webserver involved.
 
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm dev` or `npm start`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+<img src="tv.jpg">
